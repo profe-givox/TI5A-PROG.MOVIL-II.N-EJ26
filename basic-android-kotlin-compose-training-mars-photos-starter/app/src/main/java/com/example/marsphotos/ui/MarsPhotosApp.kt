@@ -50,8 +50,8 @@ fun MarsPhotosApp() {
             val marsViewModel: MarsViewModel = viewModel()
             HomeScreen(
                 marsUiState = marsViewModel.marsUiState,
-                modifier = Modifier.padding(it)
-
+                modifier = Modifier.padding(it),
+                retryAction = marsViewModel::getMarsPhotos
             )
         }
     }
