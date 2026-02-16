@@ -41,6 +41,13 @@ class BlurViewModel(private val bluromaticRepository: BluromaticRepository) : Vi
 
     internal val blurAmount = BlurAmountData.blurAmount
 
+    /**
+     * Call method from repository to cancel any ongoing WorkRequest
+     * */
+    fun cancelWork() {
+        bluromaticRepository.cancelWork()
+    }
+
     val blurUiState: StateFlow<BlurUiState> = bluromaticRepository.outputWorkInfo
         .map { info ->
             val outputImageUri = info!!.outputData.getString(KEY_IMAGE_URI)
