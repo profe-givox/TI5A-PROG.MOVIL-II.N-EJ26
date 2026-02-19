@@ -8,11 +8,7 @@ import android.database.Cursor
 import android.net.Uri
 import com.example.inventory.data.InventoryDatabase
 import com.example.inventory.data.Item
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import kotlin.coroutines.coroutineContext
 
 class InventoryProvider : ContentProvider() {
 
@@ -42,10 +38,6 @@ class InventoryProvider : ContentProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor? {
-        val result = GlobalScope.launch {
-             database.itemDao().selectAllCursor()
-        }
-
         val match = sUriMatcher.match(uri)
         val cursor: Cursor? =
             when (match) {
@@ -79,12 +71,15 @@ class InventoryProvider : ContentProvider() {
                 val quantity = values?.getAsInteger(ItemContract.ItemEntry.COLUMN_QUANTITY) ?: 0
                 
                 val item = Item(name = name, price = price, quantity = quantity)
-                runBlocking { database.itemDao().insert(item) }
+                val nid = runBlocking { database.itemDao().insert(item) }
                 
-                context?.contentResolver?.notifyChange(uri, null)
-                // Note: Since insert returns Unit, we don't have the new ID.
-                // In a real app, you'd update the DAO to return Long.
-                uri
+                if (nid != -1L) {
+                    val returnUri = ContentUris.withAppendedId(ItemContract.ItemEntry.CONTENT_URI, nid)
+                    context?.contentResolver?.notifyChange(uri, null)
+                    returnUri
+                } else {
+                    null
+                }
             }
             else -> throw IllegalArgumentException("Insertion is not supported for $uri")
         }
@@ -95,17 +90,6 @@ class InventoryProvider : ContentProvider() {
         return when (match) {
             ITEM_ID -> {
                 val id = ContentUris.parseId(uri).toInt()
-                // We need to fetch the item first because delete(item) takes an object
-                // This is inefficient but necessary with the current DAO signature
-                runBlocking {
-                    // This is a bit tricky since getItem returns a Flow
-                    // For a Provider, direct SQL delete via openHelper is often better 
-                    // if the DAO isn't optimized for it.
-                }
-
-
-
-                // For simplicity and to avoid complex Flow handling in runBlocking:
                 val count = database.openHelper.writableDatabase.delete(
                     ItemContract.ItemEntry.TABLE_NAME,
                     "${ItemContract.ItemEntry.COLUMN_ID} = ?",

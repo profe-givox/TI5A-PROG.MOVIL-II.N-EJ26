@@ -16,7 +16,7 @@ object ItemContract {
 
         const val TABLE_NAME = "items"
 
-        const val COLUMN_ID = BaseColumns._ID
+        const val COLUMN_ID = "id"
         const val COLUMN_NAME = "name"
         const val COLUMN_PRICE = "price"
         const val COLUMN_QUANTITY = "quantity"

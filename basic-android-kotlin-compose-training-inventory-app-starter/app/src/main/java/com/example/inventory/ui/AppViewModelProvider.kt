@@ -23,24 +23,17 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.inventory.InventoryApplication
-import com.example.inventory.data.ProviderItemsRepository
 import com.example.inventory.ui.home.HomeViewModel
 import com.example.inventory.ui.item.ItemDetailsViewModel
 import com.example.inventory.ui.item.ItemEditViewModel
 import com.example.inventory.ui.item.ItemEntryViewModel
-import com.example.inventory.ui.providers.ProviderTestViewModel
+
 
 /**
  * Provides Factory to create instance of ViewModel for the entire Inventory app
  */
 object AppViewModelProvider {
     val Factory = viewModelFactory {
-        // Initializer for ProviderTestViewModel
-        initializer {
-            ProviderTestViewModel(
-                ProviderItemsRepository(inventoryApplication().applicationContext)
-            )
-        }
 
         // Initializer for ItemEditViewModel
         initializer {
