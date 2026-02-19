@@ -16,6 +16,7 @@
 package com.example.inventory
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,6 +24,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import com.example.inventory.providers.ItemContract
+import com.example.inventory.ui.providers.ProviderTestScreen
 import com.example.inventory.ui.theme.InventoryTheme
 
 class MainActivity : ComponentActivity() {
@@ -36,9 +39,32 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+
                     InventoryApp()
+
+                    //PAntalla para probar content provider
+                    //ProviderTestScreen()
                 }
             }
         }
+
+        val cursor = contentResolver.query(
+                ItemContract.ItemEntry.CONTENT_URI,
+                arrayOf(ItemContract.ItemEntry.COLUMN_ID,
+                    ItemContract.ItemEntry.COLUMN_NAME,
+                    ItemContract.ItemEntry.COLUMN_PRICE),
+                null,
+                null,
+                null
+            )
+
+        cursor?.let {
+            while (it.moveToNext()) {
+                Log.i("CursorXX", "ID: ${it.getInt(0)}, " +
+                        "Name: ${it.getString(1)}, " +
+                        "Price: ${it.getDouble(2)}")
+            }
+        }
+
     }
 }

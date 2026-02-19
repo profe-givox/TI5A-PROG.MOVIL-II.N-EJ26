@@ -8,17 +8,23 @@ import android.database.Cursor
 import android.net.Uri
 import com.example.inventory.data.InventoryDatabase
 import com.example.inventory.data.Item
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlin.coroutines.coroutineContext
 
 class InventoryProvider : ContentProvider() {
 
     companion object {
         private const val ITEMS = 100
         private const val ITEM_ID = 101
+        private const val ITEM_FILTER = 102
 
         private val sUriMatcher = UriMatcher(UriMatcher.NO_MATCH).apply {
             addURI(ItemContract.AUTHORITY, ItemContract.PATH_ITEMS, ITEMS)
             addURI(ItemContract.AUTHORITY, "${ItemContract.PATH_ITEMS}/#", ITEM_ID)
+            addURI(ItemContract.AUTHORITY, "${ItemContract.PATH_ITEMS}/*", ITEM_FILTER)
         }
     }
 
@@ -36,6 +42,10 @@ class InventoryProvider : ContentProvider() {
         selectionArgs: Array<out String>?,
         sortOrder: String?
     ): Cursor? {
+        val result = GlobalScope.launch {
+             database.itemDao().selectAllCursor()
+        }
+
         val match = sUriMatcher.match(uri)
         val cursor: Cursor? =
             when (match) {
@@ -92,6 +102,9 @@ class InventoryProvider : ContentProvider() {
                     // For a Provider, direct SQL delete via openHelper is often better 
                     // if the DAO isn't optimized for it.
                 }
+
+
+
                 // For simplicity and to avoid complex Flow handling in runBlocking:
                 val count = database.openHelper.writableDatabase.delete(
                     ItemContract.ItemEntry.TABLE_NAME,
