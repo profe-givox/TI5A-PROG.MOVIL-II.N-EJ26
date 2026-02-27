@@ -10,8 +10,15 @@ import android.telephony.SmsMessage
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +28,9 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 import net.ivanvega.mitelefoniacompose.ui.theme.MiTelefoniaComposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,7 +43,6 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
                     HomeScreen()
                 }
             }
@@ -48,10 +57,8 @@ fun SystemBroadcastReceiver(
 ) {
     // Grab the current context in this part of the UI tree
     val context = LocalContext.current
-
     // Safely use the latest onSystemEvent lambda passed to the function
     val currentOnSystemEvent by rememberUpdatedState(onSystemEvent)
-
     // If either context or systemAction changes, unregister and register again
     DisposableEffect(context, systemAction) {
         val intentFilter = IntentFilter(systemAction)
@@ -69,11 +76,10 @@ fun SystemBroadcastReceiver(
 }
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(homeViewModel: ScreenViewModel = viewModel()) {
 
     SystemBroadcastReceiver(Telephony.Sms.Intents.SMS_RECEIVED_ACTION) { intent ->
         var strMensaje = ""
-        val isCharging = /* Get from batteryStatus ... */ true
         val bndSMS: Bundle? = intent?.getExtras()
         val pdus = bndSMS?.get("pdus") as Array<Any>?
         val smms: Array<SmsMessage?> = arrayOfNulls<SmsMessage>(pdus!!.size)
@@ -81,29 +87,53 @@ fun HomeScreen() {
             smms[i] = SmsMessage.createFromPdu(pdus!![i] as ByteArray)
             strMensaje +="${"Mensaje: " + smms[i]?.getOriginatingAddress()}\n" +
                     "${smms[i]?.getMessageBody().toString()}"
-
-
         }
         Log.d("MiBroadcastEnEjecucion", strMensaje)
-        /* Do something if the device is charging */
-
     }
 
-    /* Rest of the HomeScreen */
-}
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Enviar SMS",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
+        OutlinedTextField(
+            value = homeViewModel.phoneNumber,
+            onValueChange = { homeViewModel.onPhoneNumberChange(it) },
+            label = { Text("Número de teléfono") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        OutlinedTextField(
+            value = homeViewModel.message,
+            onValueChange = { homeViewModel.onMessageChange(it) },
+            label = { Text("Mensaje") },
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 3
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Button(
+            onClick = { homeViewModel.sendSMS() },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Enviar SMS")
+        }
+    }
 }
 
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     MiTelefoniaComposeTheme {
-        Greeting("Android")
+        HomeScreen()
     }
 }
