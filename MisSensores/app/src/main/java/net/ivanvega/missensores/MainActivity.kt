@@ -1,5 +1,6 @@
 package net.ivanvega.missensores
 
+import android.content.Context.SENSOR_SERVICE
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -14,8 +15,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import dev.ricknout.composesensors.accelerometer.getAccelerometerSensor
 import dev.ricknout.composesensors.accelerometer.isAccelerometerSensorAvailable
@@ -35,10 +40,14 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         setContent {
             MisSensoresTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
+                    Greeting2(
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
+                    /*Greeting(
+                        name = "Android",
+                        modifier = Modifier.padding(innerPadding)
+                    )*/
                 }
             }
         }
@@ -123,6 +132,49 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         // Do something with this sensor value.
         Log.d("Sensor", "Sensor: $lux ")
     }
+}
+
+@Composable
+fun Greeting2(name: String, modifier: Modifier = Modifier) {
+    val ctx = LocalContext.current
+    val estadode = remember  { mutableStateOf("")}
+
+    DisposableEffect (Unit) {
+        val sensorManager = ctx.getSystemService(SENSOR_SERVICE) as SensorManager
+        val sa = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        val listener = object : SensorEventListener {
+
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+            }
+
+            override fun onSensorChanged(event: SensorEvent?) {
+                val str =  "Acelerometro:  x: ${event!!.values[0]} y: ${event.values[1]} z: ${event.values[2]}"
+                estadode.value = str
+
+            }
+
+        }
+        sensorManager.registerListener(listener,
+            sa,
+            SensorManager.SENSOR_DELAY_NORMAL
+            )
+
+        onDispose {
+            sensorManager.unregisterListener(listener)
+        }
+    }
+
+    Text(
+        text = "Hello $name!\n" + estadode.value,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun DisposeableEffect(x0: Unit, content: @Composable () -> Unit) {
+    TODO("Not yet implemented")
 }
 
 @Composable
