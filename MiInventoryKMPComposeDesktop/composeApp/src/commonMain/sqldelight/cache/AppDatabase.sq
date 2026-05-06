@@ -1,0 +1,25 @@
+import kotlin.Int;
+
+-- Crear la tabla
+CREATE TABLE Item (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    price REAL NOT NULL,
+    quantity INTEGER NOT NULL
+);
+
+-- Consultas (Queries)
+getAllItems:
+SELECT * FROM Item ORDER BY name ASC;
+
+getItemById:
+SELECT * FROM Item WHERE id = ?;
+
+insertItem:
+INSERT INTO Item(name, price, quantity) VALUES (?, ?, ?);
+
+updateItem:
+UPDATE Item SET name = ?, price = ?, quantity = ? WHERE id = ?;
+
+deleteItem:
+DELETE FROM Item WHERE id = ?;
