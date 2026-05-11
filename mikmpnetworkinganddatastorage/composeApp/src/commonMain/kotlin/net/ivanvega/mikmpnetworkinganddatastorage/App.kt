@@ -10,18 +10,33 @@ import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.jetbrains.compose.resources.painterResource
 
 import mikmpnetworkinganddatastorage.composeapp.generated.resources.Res
 import mikmpnetworkinganddatastorage.composeapp.generated.resources.compose_multiplatform
+import net.ivanvega.mikmpnetworkinganddatastorage.cache.DatabaseDriverFactory
 
 @Composable
-@Preview
-fun App() {
+fun App( dbDriverFactory: DatabaseDriverFactory) {
+
+    val viewModel = viewModel {
+        RocketLaunchViewModel(
+            SpaceXSDK(
+                databaseDriverFactory = dbDriverFactory
+            )
+        )
+    }
+    val state by remember { viewModel.state }
+    val coroutineScope = rememberCoroutineScope()
+    var isRefreshing by remember { mutableStateOf(false) }
+    val pullToRefreshState = rememberPullToRefreshState()
+
     MaterialTheme {
         var showContent by remember { mutableStateOf(false) }
         Column(

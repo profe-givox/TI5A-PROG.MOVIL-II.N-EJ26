@@ -38,7 +38,6 @@ internal class Database(databaseDriverFactory: DatabaseDriverFactory) {
             )
         )
     }
-
     internal fun clearAndCreateLaunches(launches: List<RocketLaunch>) {
         dbQuery.transaction {
             dbQuery.removeAllLaunches()
