@@ -12,4 +12,4 @@ fun main() = application {
     ) {
         App(JvmDatabaseDriverFactory() )
     }
-}
+}   

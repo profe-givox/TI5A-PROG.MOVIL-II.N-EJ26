@@ -49,7 +49,6 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.androidx.activity.compose)
-
             implementation(libs.ktor.client.android)
             implementation(libs.android.driver)
         }
@@ -77,6 +76,7 @@ kotlin {
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.ktor.client.okhttp)
             implementation(libs.sqlite.jvm.driver)
 
         }
